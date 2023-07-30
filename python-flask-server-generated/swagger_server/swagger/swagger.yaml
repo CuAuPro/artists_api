@@ -1,0 +1,211 @@
+openapi: 3.0.0
+info:
+  title: Simple API
+  description: A simple API to illustrate OpenAPI concepts
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+security:
+- BasicAuth: []
+tags:
+- name: records
+  description: Everything about Artists' records
+paths:
+  /artists:
+    get:
+      tags:
+      - records
+      description: Returns a list of artists
+      operationId: artists_get
+      parameters:
+      - name: limit
+        in: query
+        description: Limits the number of items on a page
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: offset
+        in: query
+        description: Specifies the page number of the artists to be displayed
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successfully returned a list of artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+                x-content-type: application/json
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+      x-openapi-router-controller: swagger_server.controllers.records_controller
+    post:
+      tags:
+      - records
+      description: Lets a user post a new artist
+      operationId: artists_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Artist'
+        required: true
+      responses:
+        "200":
+          description: Successfully created a new artist
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+      x-openapi-router-controller: swagger_server.controllers.records_controller
+  /artists/{username}:
+    get:
+      tags:
+      - records
+      description: Obtain information about an artist from his or her unique username
+      operationId: artists_username_get
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successfully returned an artist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artist'
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+      x-openapi-router-controller: swagger_server.controllers.records_controller
+    put:
+      tags:
+      - records
+      summary: Update an artist by username
+      operationId: artists_username_put
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Artist'
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+      x-openapi-router-controller: swagger_server.controllers.records_controller
+    delete:
+      tags:
+      - records
+      summary: Delete an artist by username
+      operationId: artists_username_delete
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+      x-openapi-router-controller: swagger_server.controllers.records_controller
+components:
+  schemas:
+    Artist:
+      required:
+      - username
+      type: object
+      properties:
+        artist_name:
+          type: string
+        artist_genre:
+          type: string
+        albums_recorded:
+          type: integer
+        username:
+          type: string
+      example:
+        artist_name: artist_name
+        albums_recorded: 0
+        artist_genre: artist_genre
+        username: username
+    inline_response_400:
+      type: object
+      properties:
+        message:
+          type: string
+  responses:
+    "400Error":
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_400'
+  parameters:
+    PageLimit:
+      name: limit
+      in: query
+      description: Limits the number of items on a page
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    PageOffset:
+      name: offset
+      in: query
+      description: Specifies the page number of the artists to be displayed
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      x-basicInfoFunc: swagger_server.controllers.authorization_controller.check_BasicAuth
+
